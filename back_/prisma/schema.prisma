@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  password     String
+  phone        String?
+  role         Role          @default(CLIENT)
+  appointments Appointment[]
+  tokens       Token[]
+
+  @@map("users")
+}
+
+model Token {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  type      TokenType
+  userId    Int
+  revoked   Boolean   @default(false)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("token")
+}
+
+model Service {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  price        Float         @default(0.0)
+  durationMin  Int           @map("duration_min")
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  clientId  Int      @map("client_id")
+  serviceId Int      @map("service_id")
+  startTime DateTime @map("start_time")
+  endTime   DateTime @map("end_time")
+  status    String   @default("PENDING")
+  client    User     @relation(fields: [clientId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
+
+  @@map("appointments")
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum TokenType {
+  ACCESS
+  REFRESH
+}
