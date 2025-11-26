@@ -9,6 +9,7 @@ export function auth(req, res, next) {
         if (!payload) return res.status(401).json(
             { error: "invalid token" }
         );
+        req.user = payload;
         next();
     } catch {
         return res.status(401).json({ error: "invalid or expired token" });

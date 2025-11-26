@@ -1,4 +1,4 @@
-import prisma from '../../config/prismaClient.js';
+import  {prisma}  from '../../config/prismaClient.js';
 import bcrypt from 'bcrypt';
 import { Role } from '@prisma/client'; // Importando o Enum Role para segurança
 

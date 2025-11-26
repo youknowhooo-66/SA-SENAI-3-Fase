@@ -1,8 +1,5 @@
 // AuthController.js (Usando Prisma Singleton)
-
-// 1. IMPORTAÇÃO CORRIGIDA: Importa APENAS a instância 'prisma' (o cliente)
-// E desestrutura os Enums TokenType e Role, que NÃO são a instância.
-import prisma from '../../config/prismaClient.js'; // <-- Importa a instância única
+import {prisma}  from '../../config/prismaClient.js';
 import pkg from '@prisma/client';
 const { TokenType, Role } = pkg; // <-- Importa APENAS os Enums
 
@@ -25,8 +22,8 @@ class AuthController {
         try {
             const { email, password, name, role } = req.body; 
             
-            if (!email || !password || !name) { 
-                return res.status(400).json({ error: "Email, nome e senha são obrigatórios" });
+            if (!email || !password) { // Name is now optional for initial registration
+                return res.status(400).json({ error: "Email e senha são obrigatórios" });
             }
             
             const existingUser = await prisma.user.findUnique({ // Usa a instância importada
@@ -44,7 +41,7 @@ class AuthController {
                 data: { 
                     email, 
                     password: hashedPassword, 
-                    name: name,
+                    name: name || 'Novo Cliente', // Provide a default name if not supplied
                     role: role && role.toUpperCase() in Role ? role.toUpperCase() : Role.CLIENT, 
                 },
                 select: { id: true, email: true, name: true, role: true },
@@ -72,8 +69,8 @@ class AuthController {
             }
             
             // Gerar tokens...
-            const accessToken = signAccessToken({ userId: user.id, email: user.email, name: user.name });
-            const refreshToken = signRefreshToken({ userId: user.id, email: user.email, name: user.name });
+            const accessToken = signAccessToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
+            const refreshToken = signRefreshToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
             
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + 7);

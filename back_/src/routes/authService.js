@@ -11,6 +11,9 @@ const router = express.Router();
 // CREATE: Criar novo serviço
 router.post('/services', auth, serviceController.create);
 
+// SEARCH: Buscar serviços por nome
+router.get('/services/search', auth, serviceController.search);
+
 // READ: Listar todos os serviços (Pode ser pública se o público puder ver a lista)
 // Deixaremos protegida por padrão para o CRUD:
 router.get('/services', auth, serviceController.getAll); 
